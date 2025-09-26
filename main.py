@@ -1,24 +1,43 @@
 # main.py
 import asyncio
+import subprocess
 from dotenv import load_dotenv
-from utils import call_agent_async, compute_stats_tool, load_json, compute_stats
+from utils import call_agent_async, load_json, compute_stats
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
-from google.adk.artifacts import InMemoryArtifactService
 import json
 
 from summary_agent.agent import root_agent, save_report
 
 load_dotenv()
 session_service = InMemorySessionService()
-artifact_service = InMemoryArtifactService()
 
+APP_NAME = "Summary Agent"
+USER_ID = "summari"
+SESSION_ID = "001"
 LOG_PATH = "/home/kali_user/Documents/Summai/logs_last2h.json"
 
 async def main_async():
-    APP_NAME = "Summary Agent"
-    USER_ID = "summari"
-    SESSION_ID = "001"
+    
+    curl_cmd = [
+        "curl",
+        "-s",
+        "-XGET", "http://127.0.0.1:64298/logstash-*/_search",
+        "-H", "Content-Type: application/json",
+        "-d", json.dumps({
+            "query": {
+                "range": {
+                    "@timestamp": {
+                        "gte": "now-2h",
+                        "lte": "now"
+                    }
+                }
+            },
+            "size": 10000
+        })
+    ]
+    with open(LOG_PATH, "w") as f:
+        subprocess.run(curl_cmd, stdout=f, check=True)
 
     # Pre-aggregate LOCALLY to keep the LLM prompt tiny
     raw = load_json(LOG_PATH)
