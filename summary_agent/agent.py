@@ -3,16 +3,6 @@ from google.adk.tools.agent_tool import AgentTool
 from google_search_agent.agent import google_search_agent
 from datetime import datetime, timezone
 
-
-def save_report(report_text: str) -> str:
-    timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H-%M-%SZ")
-    filename = f"reports/Honeypot_Attack_Summary_Report_{timestamp}.txt"
-
-    with open(filename, "w", encoding="utf-8") as f:
-        f.write(report_text)
-
-    return None
-
 root_agent = LlmAgent(
     name="summary_agent",
     model="gemini-2.5-pro",
@@ -32,9 +22,6 @@ root_agent = LlmAgent(
     * Top targeted ports/protocols (table).
     - A short Notes/Limitations section.
     - Keep it crisp, ~400–700 words. Do NOT invent numbers not present in the stats.
-    
-    Your tools are as follows:
-    - save_report
     """,
-    tools=[save_report],
+
 )

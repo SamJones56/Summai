@@ -2,12 +2,13 @@
 import asyncio
 import subprocess
 from dotenv import load_dotenv
-from utils import call_agent_async, load_json, compute_stats
+from utils import call_agent_async, load_json, compute_stats, save_report
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 import json
+import os
 
-from summary_agent.agent import root_agent, save_report
+from summary_agent.agent import root_agent
 
 load_dotenv()
 session_service = InMemorySessionService()
@@ -15,7 +16,9 @@ session_service = InMemorySessionService()
 APP_NAME = "Summary Agent"
 USER_ID = "summari"
 SESSION_ID = "001"
-LOG_PATH = "/home/kali_user/Documents/Summai/logs_last2h.json"
+PROJECT_DIR = os.path.expanduser("~/Summai")
+LOG_PATH = os.path.join(PROJECT_DIR, "logs_last2h.json")
+os.makedirs(PROJECT_DIR, exist_ok=True)
 
 async def main_async():
     
@@ -69,7 +72,7 @@ async def main_async():
         print("Agent call failed or returned no text.")
 
     # Persist the report
-    path = save_report(report_text)
+    # path = save_report(report_text)
     print(f"\nSaved report to: {path}\n")
     print("\n--- Finished ---\n")
 

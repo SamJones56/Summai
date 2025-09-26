@@ -38,6 +38,13 @@ def compute_stats(es_json: dict, top_n: int = 10):
         "ports": ports.most_common(top_n),
     }
 
+def save_report(report_text: str) -> str:
+    timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H-%M-%SZ")
+    filename = f"reports/Honeypot_Attack_Summary_Report_{timestamp}.txt"
+
+    with open(filename, "w", encoding="utf-8") as f:
+        f.write(report_text)
+
 async def process_agent_response(event):
     """Return the final text response if available."""
     if event.is_final_response():
