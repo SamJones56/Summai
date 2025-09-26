@@ -1,0 +1,26 @@
+# Create virtual environment in the root directory
+python -m venv .venv
+
+# Activate (each new terminal)
+# macOS/Linux:
+source .venv/bin/activate
+# Windows CMD:
+.venv\Scripts\activate.bat
+# Windows PowerShell:
+.venv\Scripts\Activate.ps1
+
+# Install dependencies
+pip install -r requirements.txt
+
+
+
+
+python3 ../create_session.py    
+
+adk web --session_service_uri="sqlite:///./my_agent_data.db" ../
+
+
+metasploitable2
+docker network create --subnet=172.18.0.0/16 pentnet 
+docker run --name metasploitable --network pentnet --ip 172.18.0.10 -it tleemcjr/metasploitable2:latest sh -c "/bin/services.sh && bash"
+
