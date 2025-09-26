@@ -1,79 +1,58 @@
+# main.py
 import asyncio
 from dotenv import load_dotenv
-from utils import call_agent_async
-
+from utils import call_agent_async, compute_stats_tool, load_json, compute_stats
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.adk.artifacts import InMemoryArtifactService
-import google.genai.types as types
+import json
 
-from summary_agent.agent import root_agent
+from summary_agent.agent import root_agent, save_report
 
 load_dotenv()
-
 session_service = InMemorySessionService()
 artifact_service = InMemoryArtifactService()
 
-with open("/home/kali_user/Documents/logs_last2h.json", "rb") as f:
-    log_bytes = f.read()
-
-log_artifact = types.Part.from_bytes(
-    data=log_bytes,
-    mime_type="application/json",
-)
-
+LOG_PATH = "/home/kali_user/Documents/Summai/logs_last2h.json"
 
 async def main_async():
-    
     APP_NAME = "Summary Agent"
     USER_ID = "summari"
     SESSION_ID = "001"
-    initial_state = {"user_name": "summariser"}
-    
-    # Create a new session
-    session = await session_service.create_session(
+
+    # Pre-aggregate LOCALLY to keep the LLM prompt tiny
+    raw = load_json(LOG_PATH)
+    stats = compute_stats(raw)
+    stats_json = json.dumps(stats, indent=2)
+
+    query = f"Here is the stats JSON:\n{stats_json}\n\nGenerate the Honeypot Attack Summary Report."
+
+    # Create a session
+    await session_service.create_session(
         app_name=APP_NAME,
         user_id=USER_ID,
         session_id=SESSION_ID,
-        state=initial_state,
+        state={"timeframe": "Last 2 hours"},
     )
 
-    # Save the artifact into the session
-    await artifact_service.save_artifact(
-        app_name=session.app_name,
-        user_id=session.user_id,
-        session_id=session.id,
-        filename="logs_last2h.json",
-        artifact=log_artifact,
-    )
-
-    # Create runner
     runner = Runner(
         agent=root_agent,
         app_name=APP_NAME,
         session_service=session_service,
-        artifact_service=artifact_service,
     )
-    
-    # Run the agent with a query
-    query = (
-        "Use the provided honeypot log artifact to generate a full professional PDF report. "
-        "The report must include:\n"
-        "- Title page with report name, generation time, and timeframe.\n"
-        "- Executive Summary with key findings.\n"
-        "- Detailed Analysis: attacks by honeypot type, source IPs/countries, methods/techniques, trends.\n"
-        "- Charts and tables for clarity.\n"
-        "- Trend comparison vs. previous window if available.\n"
-        "- Appendix with raw counts.\n\n"
-        "Save a copy"
-    )
- 
-    print(f"\n--- Running Query: {query} ---\n")
 
-    await call_agent_async(runner, USER_ID, SESSION_ID, query)
+    print("\n--- Generating report with compact stats ---\n")
+    report_text = await call_agent_async(runner, USER_ID, SESSION_ID, query)
+    if report_text:
+        path = save_report(report_text)
+        print(f"Report saved to {path}")
+    else:
+        print("Agent call failed or returned no text.")
 
-    print("\n\n--- Finished ---")
-
+    # Persist the report
+    path = save_report(report_text)
+    print(f"\nSaved report to: {path}\n")
+    print("\n--- Finished ---\n")
 
 if __name__ == "__main__":
     asyncio.run(main_async())

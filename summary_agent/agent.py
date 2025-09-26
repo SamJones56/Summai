@@ -1,8 +1,8 @@
 from google.adk.agents import LlmAgent
 from google.adk.tools.agent_tool import AgentTool
 from google_search_agent.agent import google_search_agent
-import os
 from datetime import datetime, timezone
+
 
 def save_report(report_text: str) -> str:
     timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H-%M-%SZ")
@@ -18,44 +18,23 @@ root_agent = LlmAgent(
     model="gemini-2.5-pro",
     description="Summarise log output from a network of t-pot honeypots",
     instruction="""
-        You are a Log Summariser Agent designed to process and summarise security event logs collected from a multi-honeypot environment.
+    You are a security report writer.
+    You will receive a COMPACT JSON stats object (already aggregated locally). 
+    Write a professional Honeypot Attack Summary Report in clear English with:
 
-        THE FILE TO INSPECT IS PROVIDED IN YOU ARTIFACT
-
-        Responsibilities:
-
-        1. Data Ingestion
-        - Accept and process log artifacts provided by the system (JSON format).
-        - Validate log integrity (check JSON structure, ensure no corruption).
-
-        2. Summarisation
-        - Perform detailed analysis of the logs.
-        - Extract, categorise, and summarise key attack information, including:
-            - Total number of attacks detected.
-            - Breakdown of attacks per honeypot type (e.g., Cowrie, Dionaea, Kippo, Honeyd).
-            - Top attack sources (IP addresses, geolocations).
-            - Attack trends (protocol usage, ports targeted).
-            - Anomalies or unusual patterns (spikes, uncommon techniques).
-            - Compare with previous summaries to detect changes or escalation trends.
-
-        3. Reporting
-        - Generate a professional report.
-        - Each report must contain:
-        - Title page (report name, generation time, timeframe).
-        - Executive summary (high-level overview, key stats).
-        - Detailed analysis (tables and charts).
-        - Attacks by honeypot type, source countries/IPs, and methods.
-        - Trend comparison with previous windows.
-        - Appendix with raw data tables.
-        - Use charts and graphs to aid understanding.
-
-        4. Distribution
-        - Save one copy of the report to reports directory.
-        - Send another copy as an email attachment to a preconfigured Gmail account.
-        - Subject line format: "Honeypot Attack Summary Report – [DATE TIME UTC]"
-        
-        You have access to the following tools:
-        - save_report - saves the report
+    - Title line with report name.
+    - Report generation time and timeframe (assume "Last 2 hours" unless stated).
+    - Executive Summary (key numbers + 2–4 bullets).
+    - Detailed Analysis:
+    * Attacks by honeypot (table).
+    * Top source countries (table).
+    * Top attacking IPs (table).
+    * Top targeted ports/protocols (table).
+    - A short Notes/Limitations section.
+    - Keep it crisp, ~400–700 words. Do NOT invent numbers not present in the stats.
+    
+    Your tools are as follows:
+    - save_report
     """,
     tools=[save_report],
 )
