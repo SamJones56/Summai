@@ -1,1 +1,14 @@
-.env
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+build/
+dist/
+*.egg-info/
+*.log
+.vscode/
+.idea/
+/playground/
+/storage/
