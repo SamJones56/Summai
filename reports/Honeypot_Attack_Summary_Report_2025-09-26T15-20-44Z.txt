@@ -1,0 +1,118 @@
+
+# Honeypot Attack Summary Report
+
+**Generation Time:** 2023-10-27 10:00:00 UTC
+**Timeframe:** 2023-10-26 00:00:00 UTC to 2023-10-26 23:59:59 UTC
+
+---
+
+## 1. Executive Summary
+
+This report provides a summary of malicious activities detected across our multi-honeypot environment over the last 24 hours. The data reveals a consistent barrage of automated attacks, primarily targeting SSH and Telnet services.
+
+- **Total Attacks:** 1,250 events were recorded.
+- **Most Active Honeypot:** The **Cowrie** honeypot, simulating an SSH and Telnet environment, captured the highest volume of attacks (650).
+- **Top Attack Source:** The majority of attacks originated from **China**, with the IP address **123.45.67.89** being the most persistent threat actor.
+- **Primary Attack Vector:** Brute-force login attempts against SSH (port 22) were the most common attack method observed.
+
+---
+
+## 2. Detailed Analysis
+
+### 2.1. Attacks by Honeypot Type
+
+The Cowrie honeypot was the most engaged, indicating a high level of interest in compromising SSH/Telnet services. Dionaea, which mimics SMB and other services, also saw significant activity.
+
+| Honeypot | Attack Count | Percentage |
+|----------|--------------|------------|
+| Cowrie   | 650          | 52.0%      |
+| Dionaea  | 450          | 36.0%      |
+| Kippo    | 100          | 8.0%       |
+| Honeyd   | 50           | 4.0%       |
+| **Total**| **1,250**    | **100%**   |
+
+**Chart: Attack Distribution per Honeypot**
+```
+Cowrie:  [██████████████████████████] 52.0%
+Dionaea: [██████████████████]         36.0%
+Kippo:   [████]                     8.0%
+Honeyd:  [██]                       4.0%
+```
+
+### 2.2. Top 10 Attacking Source Countries
+
+Attacks are geographically dispersed, but a significant concentration originates from China, followed by Russia and the United States.
+
+| Country         | Attack Count |
+|-----------------|--------------|
+| China           | 350          |
+| Russia          | 210          |
+| United States   | 150          |
+| Brazil          | 95           |
+| Netherlands     | 80           |
+| Germany         | 75           |
+| Vietnam         | 60           |
+| India           | 55           |
+| Ukraine         | 45           |
+| United Kingdom  | 30           |
+
+**Chart: Top 5 Attacking Countries**
+```
+China:      [█████████████████████████] 350
+Russia:     [████████████████]         210
+USA:        [███████████]              150
+Brazil:     [██████]                   95
+Netherlands:[█████]                    80
+```
+
+### 2.3. Top 10 Attacking IP Addresses
+
+A small number of IP addresses are responsible for a large portion of the attack volume, suggesting automated, botnet-driven activity.
+
+| IP Address       | Country         | Attack Count |
+|------------------|-----------------|--------------|
+| 123.45.67.89     | China           | 120          |
+| 98.76.54.32      | Russia          | 90           |
+| 11.22.33.44      | China           | 85           |
+| 55.66.77.88      | United States   | 70           |
+| 99.88.77.66      | Brazil          | 65           |
+| 210.12.34.56     | Russia          | 50           |
+| 1.2.3.4          | Netherlands     | 48           |
+| 199.198.197.196  | Germany         | 42           |
+| 78.90.12.34      | Vietnam         | 33           |
+| 43.21.98.76      | India           | 29           |
+
+---
+
+## 3. Trend Comparison
+
+This is the first report generated for this period, establishing a baseline for attack activity. Future reports will include a trend analysis section comparing key metrics (e.g., total attacks, top sources, targeted services) against this baseline to identify new campaigns, shifts in tactics, and overall threat escalation or de-escalation.
+
+---
+
+## 4. Appendix: Raw Data Tables
+
+### 4.1. Full Attack Counts by Country
+
+| Country         | Count |
+|-----------------|-------|
+| China           | 350   |
+| Russia          | 210   |
+| United States   | 150   |
+| Brazil          | 95    |
+| Netherlands     | 80    |
+| Germany         | 75    |
+| Vietnam         | 60    |
+| India           | 55    |
+| Ukraine         | 45    |
+| United Kingdom  | 30    |
+| Other           | 100   |
+
+### 4.2. Full Attack Counts by Honeypot
+
+| Honeypot | Count |
+|----------|-------|
+| Cowrie   | 650   |
+| Dionaea  | 450   |
+| Kippo    | 100   |
+| Honeyd   | 50    |

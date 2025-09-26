@@ -1,75 +1,61 @@
-from google.adk.agents import LLMAgnet
+from google.adk.agents import LlmAgent
 from google.adk.tools.agent_tool import AgentTool
+from google_search_agent.agent import google_search_agent
+import os
+from datetime import datetime, timezone
 
-from io import TextIOBase
-import re
+def save_report(report_text: str) -> str:
+    timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H-%M-%SZ")
+    filename = f"reports/Honeypot_Attack_Summary_Report_{timestamp}.txt"
 
+    with open(filename, "w", encoding="utf-8") as f:
+        f.write(report_text)
 
-# https://fanchenbao.medium.com/chunk-read-a-large-file-in-python-4b887058215
-def chunk_read(f_obj: TextIOBase, sentinel: str, max_sentinel: int):
-    """Read a file object in chunks
-    Read the file object line by line. Each time a sentinel is detected, we increment
-    a count. Once the count reaches max_sentinel, we have gatherered the required
-    chunk and yield it.
-    NOTE: during chunking, we remove all the white spaces and tabs to reduce the
-    memory load.
-    params:
-    :param f_obj: A file object from opening a text file.
-    :type f_obj: TextIOBase
-    :param sentinel: A string pattern (regex supported) to recognize a specific
-        line.
-    :type sentinel: str
-    :param max_sentinel: Max number of appearance of sentinels allowed in a chunk.
-        This is equivalent to a chunk size, but more meaningful than based on only
-        line counts.
-    :type max_sentinel: int
-    :yield: A chunk of the file
-    :rtype: Iterator[str]
-    """
-    cnt, chunk = 0, ""
-    for line in f_obj:
-        match = re.search(sentinel, line)
-        if match:
-            cnt += 1
-        if cnt <= max_sentinel:
-            chunk += line.strip()
-        else:
-            yield chunk
-            cnt = 0
-            chunk = line.strip()
-    yield chunk
+    return None
 
-
-# TODO: Migrate from adk_run to scripting session, runner, and launching of the application
-# TODO: Change chunk to long running tool: https://google.github.io/adk-docs/tools/function-tools/#long-run-tool
-# TODO: send_email tool
-# TODO: pdf_tool
-
-summary_agent = LLMAgnet(
+root_agent = LlmAgent(
     name="summary_agent",
-    model="gemeni-2.5.pro",
+    model="gemini-2.5-pro",
     description="Summarise log output from a network of t-pot honeypots",
-    Instruction="""
-    You are an log summariser agent,
+    instruction="""
+        You are a Log Summariser Agent designed to process and summarise security event logs collected from a multi-honeypot environment.
 
-    You are responsible from summarisng the log files from a multi-honeypot setup,
+        THE FILE TO INSPECT IS PROVIDED IN YOU ARTIFACT
 
-   You will be conducting the summarisation every 4 hours,
+        Responsibilities:
 
-    This summarisation will be in the PDF format,
+        1. Data Ingestion
+        - Accept and process log artifacts provided by the system (JSON format).
+        - Validate log integrity (check JSON structure, ensure no corruption).
 
-    A copy will be saved locally and a copy will be sent to a gmail account,
+        2. Summarisation
+        - Perform detailed analysis of the logs.
+        - Extract, categorise, and summarise key attack information, including:
+            - Total number of attacks detected.
+            - Breakdown of attacks per honeypot type (e.g., Cowrie, Dionaea, Kippo, Honeyd).
+            - Top attack sources (IP addresses, geolocations).
+            - Attack trends (protocol usage, ports targeted).
+            - Anomalies or unusual patterns (spikes, uncommon techniques).
+            - Compare with previous summaries to detect changes or escalation trends.
 
-    On completion of
+        3. Reporting
+        - Generate a professional report.
+        - Each report must contain:
+        - Title page (report name, generation time, timeframe).
+        - Executive summary (high-level overview, key stats).
+        - Detailed analysis (tables and charts).
+        - Attacks by honeypot type, source countries/IPs, and methods.
+        - Trend comparison with previous windows.
+        - Appendix with raw data tables.
+        - Use charts and graphs to aid understanding.
 
-    You make use of the following tools:
-    - Chunk reader - reads data and splits it into chunks
-    -
-    -
-
-    You make use of the following Agents as tools:
-    -
-
+        4. Distribution
+        - Save one copy of the report to reports directory.
+        - Send another copy as an email attachment to a preconfigured Gmail account.
+        - Subject line format: "Honeypot Attack Summary Report – [DATE TIME UTC]"
+        
+        You have access to the following tools:
+        - save_report - saves the report
     """,
-    tools=[AgentTool(google_search_agent), chunk_read],
+    tools=[save_report],
 )
