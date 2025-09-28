@@ -36,7 +36,8 @@ def read_contents(path: str):
     Returns:
         _type_: retruns the contents
     """
-    with open(path, "r") as f:
+    full_path = os.path.join(FILTERED_PATH, path)
+    with open(full_path, "r") as f:
         return f.read()
     
 def save_final_report(report_text: str):
@@ -56,6 +57,28 @@ def save_final_report(report_text: str):
         return f"Done writing: {filename}\n{report_text}"
     else:
         return "Error: report text was empty"
+
+import json
+
+def chunk_logs(path: str, chunk_size: int = 500):
+    """Read a JSONL log file and return chunks of N lines (default 500)."""
+    full_path = os.path.join(FILTERED_PATH, path)
+    chunks = []
+    current = []
+
+    try:
+        with open(full_path, "r") as f:
+            for i, line in enumerate(f, 1):
+                current.append(line.strip())
+                if i % chunk_size == 0:
+                    chunks.append("\n".join(current))
+                    current = []
+            if current:
+                chunks.append("\n".join(current))
+    except Exception as e:
+        return {"error": str(e)}
+
+    return {"chunks": chunks}
 
 
 root_agent = LlmAgent(
@@ -102,10 +125,13 @@ root_agent = LlmAgent(
         
     You have access to the following tools:
     - ls_files : Returns the three files we want to summarise
-    - read_contents : This returns the content of a specified file
+    - chunk_logs : This returns the file contents in smaller chunks (default 500 lines each)
+    
     - get_current_time : Returns the current date time UTC
     - save_final_report : Use this to save the final report once you have gathered and summarised all available data
     """,
+    tools=[ls_files, chunk_logs, get_current_time, save_final_report]
 )
 
 
+# - read_contents : This returns the content of a specified file

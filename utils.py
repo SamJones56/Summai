@@ -30,11 +30,15 @@ async def call_agent_async(runner, user_id, session_id, query):
         async for event in runner.run_async(
             user_id=user_id, session_id=session_id, new_message=content
         ):
+            # Debug: print the raw event
+            print("DEBUG EVENT:", event)
+
             response = await process_agent_response(event)
             if response:
+                print("DEBUG RESPONSE TEXT:", response)  
                 final_response_text = response
     except Exception as e:
-        # If anything fails, return None
+        print("ERROR in call_agent_async:", e)  
         return None
 
     return final_response_text

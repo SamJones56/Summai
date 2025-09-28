@@ -1,7 +1,7 @@
 # main.py
 import asyncio
 from dotenv import load_dotenv
-from utils import call_agent_async, save_report, log_puller_parser
+from utils import call_agent_async, save_report
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 import os
@@ -20,8 +20,6 @@ os.makedirs(PROJECT_DIR, exist_ok=True)
 
 
 async def main_async():
-    log_puller_parser()
-    
     # Create a session
     await session_service.create_session(
         app_name=APP_NAME,
@@ -36,7 +34,7 @@ async def main_async():
         session_service=session_service,
     )
     
-    query = "Generate a report based off of {data}"
+    query = "Generate a report based off of the last three 20 minute report snippets."
     report_text = await call_agent_async(runner, USER_ID, SESSION_ID, query)
     if report_text:
         path = save_report(report_text)
