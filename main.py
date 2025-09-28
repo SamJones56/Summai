@@ -1,7 +1,6 @@
-# main.py
 import asyncio
 from dotenv import load_dotenv
-from utils import call_agent_async, save_report
+from utils import call_agent_async  
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 import os
@@ -27,23 +26,24 @@ async def main_async():
         session_id=SESSION_ID,
         state={"timeframe": "Last 1 hours"},
     )
+
     # Create runner
     runner = Runner(
         agent=root_agent,
         app_name=APP_NAME,
         session_service=session_service,
     )
-    
-    query = "Generate a report based off of the last three 20 minute report snippets."
+
+    query = "Generate a report based off of the last three 2 minute snippets of tpot data"
     report_text = await call_agent_async(runner, USER_ID, SESSION_ID, query)
     if report_text:
-        path = save_report(report_text)
-        print(f"Report saved to {path}")
+        # The agent should already have saved the report via save_final_report
+        print(report_text)
     else:
         print("Agent call failed or returned no text.")
 
-    print(f"\nSaved report to: {path}\n")
     print("\n--- Finished ---\n")
+
 
 if __name__ == "__main__":
     asyncio.run(main_async())

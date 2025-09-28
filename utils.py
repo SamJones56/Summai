@@ -1,11 +1,4 @@
 from google.genai import types
-from datetime import datetime, timezone
-
-def save_report(report_text: str) -> str:
-    timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H-%M-%SZ")
-    filename = f"reports/Honeypot_Attack_Summary_Report_{timestamp}.txt"
-    with open(filename, "w", encoding="utf-8") as f:
-        f.write(report_text)
 
 async def process_agent_response(event):
     """Return the final text response if available."""

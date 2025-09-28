@@ -2,13 +2,13 @@ import json
 import os
 import subprocess
 from datetime import datetime, timezone
-
+from utils_agg import aggregate_logs
 def log_puller_parser():
     os.makedirs("filtered", exist_ok=True)
 
     ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    filtered_file = f"filtered/filtered_log_{ts}.jsonl" 
-
+    filtered_file = f"filtered/raw/filtered_log_{ts}.jsonl" 
+    agg_file = f"filtered/agg/agg_log_{ts}.json"
     fields = [
         "@timestamp",
         # network
@@ -101,7 +101,7 @@ def log_puller_parser():
     
     result = subprocess.run(curl_cmd, capture_output=True, text=True)
 
-    # --- NEW: check cURL result and handle errors ---
+    # --- check cURL result and handle errors ---
     if result.returncode != 0:
         print("cURL failed:", result.stderr)
         return
@@ -127,6 +127,13 @@ def log_puller_parser():
 
     size = os.path.getsize(filtered_file) / (1024*1024)
     print(f"Saved {filtered_file} ({size:.2f} MB)")
+    
+    stats = aggregate_logs([filtered_file])
+    # agg_file = filtered_file.replace("filtered_log_", "agg_log_").replace(".jsonl", ".json")
+    with open(agg_file, "w") as f:
+        json.dump(stats, f, indent=2)
+    size = os.path.getsize(agg_file) / (1024*1024)
+    print(f"Saved aggregated stats {agg_file}.\nSize {size}")
 
 def main():
     log_puller_parser()
