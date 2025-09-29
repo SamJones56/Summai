@@ -14,7 +14,6 @@ APP_NAME = "Summary Agent"
 USER_ID = "summari"
 SESSION_ID = "001"
 PROJECT_DIR = os.path.expanduser("~/Summai")
-LOG_PATH = os.path.join(PROJECT_DIR, "logs_last1h.json")
 os.makedirs(PROJECT_DIR, exist_ok=True)
 
 

@@ -3,8 +3,9 @@ import os
 import subprocess
 from datetime import datetime,timezone
 
-FINAL_PATH = "reports/"
-FILTERED_PATH = "filtered/agg"
+FINAL_PATH = os.path.expanduser("~/Summai/reports")
+FILTERED_PATH = os.path.expanduser("~/Summai/filtered/agg")
+
 
 def get_current_time():
     """Returns the current date time UTC
@@ -12,7 +13,7 @@ def get_current_time():
     Returns:
         _type_: Returns the current date time
     """
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H-%M-%SZ")
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 def ls_files():
     """List the 3 most recent JSON honeypot logs in the filtered logs directory."""
@@ -58,17 +59,15 @@ def save_final_report(report_text: str):
     else:
         return "Error: report text was empty"
 
-
-
 root_agent = LlmAgent(
     name="summary_agent",
     model="gemini-2.5-pro",
     description="Summarise raw T-Pot honeypot logs into a professional hourly report",
     instruction="""
         You are a cybersecurity analyst writing Honeypot Attack Summary Reports.
-
+        This report will be read by another AI Agent every 8-12 hours so include as much relevant data as possible.
         Input comes as JSON.
-        Use the `read_contents` tool to read them. 
+        Use the `read_contents` tool to read them.
         before writing the final report with `save_final_report`.
 
         Steps:
@@ -77,17 +76,31 @@ root_agent = LlmAgent(
         3. Aggregate: total count, attacks by type, CVEs, commands, IPs, etc.
         4. After finishing all files, generate one consolidated report.
 
-        Report structure:
-        1. Title
-        2. Report Info
-        3. Executive Summary
-        4. Detailed Analysis (attacks by honeypot, top IPs, ports, CVEs, creds, commands)
-        5. Notes & Limitations
+        Create Honeypot Attack Summary:
+            - Title line with report name.
+            - Report generation time and timeframe.
+            - List of all files used to generate the report.
+            
+        Below are the expected lists:
+            - Executive Summary
+            - Detailed Analysis:
+            * Attacks by honeypot (simple list).
+            * Top attacking IPs (simple list).
+            * Top targeted ports/protocols (simple list).
+            * Most common CVEs (simple list).
+            * Commands attempted by attackers (simple list).
+            * Signatures triggered (simple list).
+            * Users / login attempts (simple list).
+            * Files uploaded/downloaded (simple list).
+            * HTTP User-Agents (simple list).
+            * SSH clients and servers (two simple lists).
+            * Top attacker AS organizations (simple list).
+            - Key Observations and Anomalies
 
         Constraints:
-        - Use only values in the logs (don’t invent).
-        - List all CVEs.
-        - Professional tone, 1000–2000 words.
+            - Use only values in the logs (don’t invent).
+            - List all CVEs.
+            - Professional tone, <1000 words.
 
         Tools:
         - ls_files

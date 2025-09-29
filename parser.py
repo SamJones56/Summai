@@ -3,12 +3,18 @@ import os
 import subprocess
 from datetime import datetime, timezone
 from utils_agg import aggregate_logs
+
 def log_puller_parser():
     os.makedirs("filtered", exist_ok=True)
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    filtered_dir = os.path.join(BASE_DIR, "filtered")
+    os.makedirs(os.path.join(filtered_dir, "raw"), exist_ok=True)
+    os.makedirs(os.path.join(filtered_dir, "agg"), exist_ok=True)
 
     ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    filtered_file = f"filtered/raw/filtered_log_{ts}.jsonl" 
-    agg_file = f"filtered/agg/agg_log_{ts}.json"
+    filtered_file = os.path.join(filtered_dir, "raw", f"filtered_log_{ts}.jsonl")
+    agg_file = os.path.join(filtered_dir, "agg", f"agg_log_{ts}.json")
     fields = [
         "@timestamp",
         # network
@@ -79,16 +85,22 @@ def log_puller_parser():
             }
         },
         "size": 10000,
-        "_source": {
-            "includes": [
-                "@timestamp","src_ip","src_port","dest_ip","dest_port","proto",
-                "type","event_type","alert","ip_rep",
-                "payload_printable","message","request","response",
-                "command","input","username","password","session",
-                "uri","md5","sha256","tls","fatt_tls","raw_sig","os","subject",
-                "host","t-pot_hostname","t-pot_ip_int","t-pot_ip_ext"
-            ]
-        },
+            "_source": {
+                "includes": [
+                    "@timestamp","src_ip","src_port","dest_ip","dest_port","proto",
+                    "type","event_type","alert","ip_rep",
+                    "payload_printable","message","request","response",
+                    "command","input","username","password","session",
+                    "uri","md5","sha256","tls","fatt_tls","raw_sig","os","subject",
+                    "host","t-pot_hostname","t-pot_ip_int","t-pot_ip_ext",
+                    # HTTP
+                    "http.user_agent","http_user_agent","user_agent",
+                    # SSH
+                    "ssh.client","ssh.server","ssh.client_version","ssh.server_version",
+                    # GeoIP / ASN
+                    "geoip.as_org","geoip.asn","geoip"
+                ]
+            },
         "sort": [{ "@timestamp": "asc" }]
     }
 
